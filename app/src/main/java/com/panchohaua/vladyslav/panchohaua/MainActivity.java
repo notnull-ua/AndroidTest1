@@ -33,44 +33,43 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView responseView;
     ProgressBar progressBar;
-    Integer page = 1;
-    Integer countPage = null;
+    Button queryButton;
 
-    static final String API_URL = "http://admin.panchoha-ua.com/v1/brands";
+    ArrayList<Brand> brands = new ArrayList<>();
+    BrandAdapter brandAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        responseView = (TextView) findViewById(R.id.responseView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        queryButton = (Button) findViewById(R.id.queryButton);
 
-        Button queryButton = (Button) findViewById(R.id.queryButton);
         queryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RetrieveFeedTask retrieveFeedTask = new RetrieveFeedTask();
-                retrieveFeedTask.execute();
+                DownloadBrand downloadBrand = new DownloadBrand(MainActivity.this);
+                downloadBrand.execute();
 
 
                 try {
-                    String jsonResponse;
-                    jsonResponse = retrieveFeedTask.get();
-
+                    brandAdapter = new BrandAdapter(MainActivity.this, downloadBrand.get());
 
                 } catch (Exception e) {
                     Log.i("log", e.getMessage());
                 }
+
+                ListView listView = (ListView) findViewById(R.id.listView);
+                listView.setAdapter(brandAdapter);
 
 
             }
         });
     }
 
-    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    /*class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
         private Exception exception;
 
@@ -131,6 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
             // responseView.setText(response);
         }
-    }
+    }*/
 
 }
