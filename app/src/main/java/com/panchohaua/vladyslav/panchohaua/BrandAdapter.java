@@ -18,23 +18,23 @@ import java.util.ArrayList;
 public class BrandAdapter extends BaseAdapter {
     Context ctx;
     LayoutInflater lInflater;
-    ArrayList<Brand> object;
+    ArrayList<Brand> mDataset;
 
     BrandAdapter(Context context, ArrayList<Brand> brands) {
         ctx = context;
-        object = brands;
+        mDataset = brands;
         lInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
 
     // кількість елементів
     public int getCount() {
-        return object.size();
+        return mDataset.size();
     }
 
     //  елемент за позицією
     public Object getItem(int position) {
-        return object.get(position);
+        return mDataset.get(position);
     }
 
     // id  по позиції
@@ -52,6 +52,7 @@ public class BrandAdapter extends BaseAdapter {
         ImageView imageView = (ImageView) view.findViewById(R.id.imageViewBrand);
 
         ((TextView) view.findViewById(R.id.nameBrand)).setText(b.getName());
+        ((TextView) view.findViewById(R.id.number)).setText(String.valueOf(position+1));
         Picasso.with(ctx).load(b.getUrlImage()).into(imageView);
 
         return view;
@@ -63,6 +64,6 @@ public class BrandAdapter extends BaseAdapter {
     }
 
     public void addData(ArrayList<Brand> data) {
-        object.addAll(data);
+        mDataset.addAll(data);
     }
 }

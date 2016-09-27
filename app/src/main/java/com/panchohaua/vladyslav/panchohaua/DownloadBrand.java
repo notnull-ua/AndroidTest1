@@ -2,14 +2,7 @@ package com.panchohaua.vladyslav.panchohaua;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,29 +14,26 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Vladyslav on 15.09.2016.
  */
-class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
+public class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
 
     private Exception exception;
     private Context context;
-    private ProgressBar progressBar;
     private int countPages;
     private int currentPage = 1;
-
+    private OnDataLoaded mListener;
 
     private static String API_URL = "http://admin.panchoha-ua.com/v1/brands";
+
 
     public DownloadBrand(Context context) {
         this.context = context;
     }
 
     protected void onPreExecute() {
-        progressBar = (ProgressBar) ((AppCompatActivity) context).findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     protected ArrayList<Brand> doInBackground(Integer... page) {
@@ -51,38 +41,36 @@ class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
         if (page != null) {
             currentPage = page[0];
         }
-            try {
-                if (currentPage > 0 && currentPage != 1) {
-                    API_URL = API_URL + "?page=" + currentPage;
-                }
-                URL url = new URL(API_URL);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                countPages = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line).append("\n");
-                    }
-                    bufferedReader.close();
-                    return this.parseJson(stringBuilder.toString());
-                } finally {
-                    urlConnection.disconnect();
-                }
-            } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
-                return null;
+        try {
+            if (currentPage > 0 && currentPage != 1) {
+                API_URL = API_URL + "?page=" + currentPage;
             }
+            URL url = new URL(API_URL);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            countPages = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                StringBuilder stringBuilder = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                }
+                bufferedReader.close();
+                return this.parseJson(stringBuilder.toString());
+            } finally {
+                urlConnection.disconnect();
+            }
+        } catch (Exception e) {
+            Log.e("ERROR", e.getMessage(), e);
+            return null;
+        }
     }
 
-    protected void onPostExecute(ArrayList response) {
-        if (response == null) {
-            Toast toast = Toast.makeText(context,
-                    "Щось пішло не так!", Toast.LENGTH_SHORT);
-            toast.show();
+    protected void onPostExecute(ArrayList<Brand> response) {
+
+        if (mListener != null) {
+            mListener.onDataLoaded(response, countPages);
         }
-        progressBar.setVisibility(View.GONE);
 
     }
 
@@ -113,5 +101,7 @@ class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
         return this.countPages;
     }
 
-
+    public void setmListener(OnDataLoaded mListener) {
+        this.mListener = mListener;
+    }
 }

@@ -1,30 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
     android:weightSum="1">
 
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="1">
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        tools:text="1"
+        android:layout_marginRight="8dp" />
 
-        <TextView
-            android:layout_width="130dp"
-            android:layout_height="wrap_content"
-            android:text="NameBrand"
-            android:id="@+id/nameBrand"
-            android:layout_gravity="left"
-            android:layout_weight="0.14" />
+    <TextView
+        android:id="@+id/nameBrand"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        tools:text="NameBrand"
+        android:layout_marginRight="8dp" />//>
 
-        <ImageView
-            android:layout_width="250dp"
-            android:layout_height="150dp"
-            android:id="@+id/imageViewBrand"
-            android:layout_gravity="top|right"
-            android:contentDescription="Тут має бути якась картинка" />
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/imageViewBrand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:contentDescription="@string/some_image_tag"
+        android:maxHeight="64dp" />
+
 </LinearLayout>
