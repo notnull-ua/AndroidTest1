@@ -61,4 +61,8 @@ public class BrandAdapter extends BaseAdapter {
     Brand getBrand(int position) {
         return ((Brand) getItem(position));
     }
+
+    public void addData(ArrayList<Brand> data) {
+        object.addAll(data);
+    }
 }

@@ -26,16 +26,16 @@ import java.util.List;
 /**
  * Created by Vladyslav on 15.09.2016.
  */
-class DownloadBrand extends AsyncTask<Void, Void, ArrayList<Brand>> {
+class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
 
     private Exception exception;
     private Context context;
     private ProgressBar progressBar;
     private int countPages;
-    private int currentPage;
+    private int currentPage = 1;
 
 
-    private static final String API_URL = "http://admin.panchoha-ua.com/v1/brands";
+    private static String API_URL = "http://admin.panchoha-ua.com/v1/brands";
 
     public DownloadBrand(Context context) {
         this.context = context;
@@ -46,29 +46,34 @@ class DownloadBrand extends AsyncTask<Void, Void, ArrayList<Brand>> {
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    protected ArrayList<Brand> doInBackground(Void... urls) {
+    protected ArrayList<Brand> doInBackground(Integer... page) {
         // Do some validation here
-
-        try {
-            URL url = new URL(API_URL);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            countPages = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder stringBuilder = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(line).append("\n");
-                }
-                bufferedReader.close();
-                return this.parseJson(stringBuilder.toString());
-            } finally {
-                urlConnection.disconnect();
-            }
-        } catch (Exception e) {
-            Log.e("ERROR", e.getMessage(), e);
-            return null;
+        if (page != null) {
+            currentPage = page[0];
         }
+            try {
+                if (currentPage > 0 && currentPage != 1) {
+                    API_URL = API_URL + "?page=" + currentPage;
+                }
+                URL url = new URL(API_URL);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                countPages = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                    bufferedReader.close();
+                    return this.parseJson(stringBuilder.toString());
+                } finally {
+                    urlConnection.disconnect();
+                }
+            } catch (Exception e) {
+                Log.e("ERROR", e.getMessage(), e);
+                return null;
+            }
     }
 
     protected void onPostExecute(ArrayList response) {
@@ -107,5 +112,6 @@ class DownloadBrand extends AsyncTask<Void, Void, ArrayList<Brand>> {
     public int getCountPages() {
         return this.countPages;
     }
+
 
 }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -36,8 +37,11 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     Button queryButton;
 
-    ArrayList<Brand> brands = new ArrayList<>();
+
     BrandAdapter brandAdapter;
+    DownloadBrand downloadBrand;
+    Integer currentPage = 1;
+    Integer countPages = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,91 +49,49 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        queryButton = (Button) findViewById(R.id.queryButton);
+        final ListView listView = (ListView) findViewById(R.id.listView);
 
-        queryButton.setOnClickListener(new View.OnClickListener() {
+        brandAdapter = new BrandAdapter(MainActivity.this, loadNextBrands());
+        listView.setAdapter(brandAdapter);
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onClick(View v) {
-                DownloadBrand downloadBrand = new DownloadBrand(MainActivity.this);
-                downloadBrand.execute();
+            public void onScrollStateChanged(AbsListView absListView, int i) {
 
+            }
 
-                try {
-                    brandAdapter = new BrandAdapter(MainActivity.this, downloadBrand.get());
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
 
-                } catch (Exception e) {
-                    Log.i("log", e.getMessage());
+                if (loadMore && downloadBrand.getStatus() == AsyncTask.Status.FINISHED && loadNextBrands() != null) {
+                    brandAdapter.addData(loadNextBrands());
+                    brandAdapter.notifyDataSetChanged();
                 }
-
-                ListView listView = (ListView) findViewById(R.id.listView);
-                listView.setAdapter(brandAdapter);
-
-
             }
         });
     }
 
-    /*class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    protected ArrayList<Brand> loadNextBrands() {
+        ArrayList<Brand> brands = new ArrayList<>();
+        downloadBrand = (DownloadBrand) new DownloadBrand(MainActivity.this).execute(this.currentPage);
+        this.countPages = downloadBrand.getCountPages();
 
-        private Exception exception;
+        try {
+            this.countPages = downloadBrand.getCountPages();
+            if (this.currentPage < this.countPages) {
+                brands = downloadBrand.get();
+                this.currentPage++;
 
-        protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-            responseView.setText("");
+            }
+            return brands;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
 
-        protected String doInBackground(Void... urls) {
-            // Do some validation here
+    }
 
-            try {
-                URL url = new URL(API_URL + "?page=" + page);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                countPage = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line).append("\n");
-                    }
-                    bufferedReader.close();
-                    return stringBuilder.toString();
-                } finally {
-                    urlConnection.disconnect();
-                }
-            } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
-                return null;
-            }
-        }
-
-        protected void onPostExecute(String response) {
-            if (response == null) {
-                response = "THERE WAS AN ERROR";
-            }
-            progressBar.setVisibility(View.GONE);
-            Log.i("INFO", response);
-            JSONArray objects = null;
-
-            try {
-                List<String> names = new ArrayList<>();
-                objects = (JSONArray) new JSONTokener(response).nextValue();
-                ListView listView = (ListView) findViewById(R.id.listView);
-                for (int i = 0; i < objects.length(); i++) {
-                    JSONObject obj = objects.getJSONObject(i);
-                    names.add(obj.getString("name"));
-                }
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, names);
-                listView.setAdapter(adapter);
-                if (page < countPage) page++;
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-            // responseView.setText(response);
-        }
-    }*/
 
 }
