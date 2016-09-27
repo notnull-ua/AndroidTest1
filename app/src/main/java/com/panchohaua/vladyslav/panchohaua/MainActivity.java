@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -23,7 +22,6 @@ public class MainActivity extends AppCompatActivity implements OnDataLoaded {
     ListView listView;
 
     BrandAdapter brandAdapter;
-    DownloadBrand downloadBrand;
     Integer currentPage = 1;
     Integer countPages = 0;
     ArrayList<Brand> mDataset;
@@ -45,26 +43,14 @@ public class MainActivity extends AppCompatActivity implements OnDataLoaded {
         listView.setAdapter(brandAdapter);
         loadMore = true;
         loadNextBrands();
-
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        listView.setOnScrollListener(new EndlessScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-//                Log.i(TAG, "-----------------------------------------------");
-//                Log.d(TAG, "onScroll: firstVisibleItem =" + firstVisibleItem);
-//                Log.d(TAG, "onScroll: visibleItemCount =" + visibleItemCount);
-//                Log.d(TAG, "onScroll: totalItemCount =" + totalItemCount);
-
-                boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
-                //
-                if (loadMore) {
-                    Log.d(TAG, "onScroll: LoadMore = true");
-
-                    loadNextBrands();
-                }
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                loadNextBrands();
+                // or customLoadMoreDataFromApi(totalItemsCount);
+                return true; // ONLY if more data is actually being loaded; false otherwise.
             }
         });
     }
@@ -72,11 +58,11 @@ public class MainActivity extends AppCompatActivity implements OnDataLoaded {
     private void loadNextBrands() {
 //        ArrayList<Brand> brands = new ArrayList<>();
         if (loadMore) {
+            Log.d(TAG, "try: downloadBrand currentPage:" + currentPage);
+            int currentPage = this.currentPage;
+            new DownloadBrand(MainActivity.this,this).execute(currentPage);
             progressBar.setVisibility(View.VISIBLE);
-            Log.d(TAG, "try: downloadBrand ");
-            downloadBrand = new DownloadBrand(MainActivity.this);
-            downloadBrand.setmListener(this);
-            downloadBrand.execute(this.currentPage);
+
 
 
         }
@@ -92,12 +78,16 @@ public class MainActivity extends AppCompatActivity implements OnDataLoaded {
                     "Щось пішло не так!", Toast.LENGTH_SHORT);
             toast.show();
         } else {
-            this.currentPage++;
             mDataset.addAll(response);
             brandAdapter.notifyDataSetChanged();
-            if (response.size() < perPage || currentPage == countPage) loadMore = false;
+            if (response.size() < perPage || currentPage == countPage) {
+                Log.d(TAG, "onDataLoaded: load more False");
+                loadMore = false;
+            }
+            this.currentPage++;
+
             Log.d(TAG, "response: size = " + mDataset.size());
-            Log.d(TAG, "current page "+currentPage+"countPage:  = " +countPage);
+            Log.d(TAG, "current page " + currentPage + "countPage:  = " + countPage);
         }
     }
 }

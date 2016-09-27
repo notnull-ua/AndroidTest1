@@ -15,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * Created by Vladyslav on 15.09.2016.
  */
@@ -33,6 +35,11 @@ public class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
         this.context = context;
     }
 
+    public DownloadBrand(Context context, OnDataLoaded mListener) {
+        this.context = context;
+        this.mListener = mListener;
+    }
+
     protected void onPreExecute() {
     }
 
@@ -40,6 +47,7 @@ public class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
         // Do some validation here
         if (page != null) {
             currentPage = page[0];
+            Log.e(TAG, "doInBackground: currentPage" + currentPage);
         }
         try {
             if (currentPage > 0 && currentPage != 1) {
@@ -67,7 +75,7 @@ public class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
     }
 
     protected void onPostExecute(ArrayList<Brand> response) {
-
+        Log.d("Tag", "post Execute()");
         if (mListener != null) {
             mListener.onDataLoaded(response, countPages);
         }
