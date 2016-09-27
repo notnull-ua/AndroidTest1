@@ -47,13 +47,14 @@ public class DownloadBrand extends AsyncTask<Integer, Void, ArrayList<Brand>> {
         // Do some validation here
         if (page != null) {
             currentPage = page[0];
-            Log.e(TAG, "doInBackground: currentPage" + currentPage);
         }
         try {
+            String apiUrl = API_URL;
             if (currentPage > 0 && currentPage != 1) {
-                API_URL = API_URL + "?page=" + currentPage;
+                apiUrl += "?page=" + currentPage;
             }
-            URL url = new URL(API_URL);
+            Log.e(TAG, "doInBackground: apiUrl" + apiUrl);
+            URL url = new URL(apiUrl);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             countPages = Integer.parseInt(urlConnection.getHeaderField("X-Pagination-Page-Count"));
             try {
