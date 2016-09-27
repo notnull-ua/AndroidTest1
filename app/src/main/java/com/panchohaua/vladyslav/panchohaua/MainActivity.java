@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
-
             }
 
             @Override
@@ -75,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     protected ArrayList<Brand> loadNextBrands() {
         ArrayList<Brand> brands = new ArrayList<>();
         downloadBrand = (DownloadBrand) new DownloadBrand(MainActivity.this).execute(this.currentPage);
-        this.countPages = downloadBrand.getCountPages();
 
         try {
             this.countPages = downloadBrand.getCountPages();
@@ -84,13 +82,10 @@ public class MainActivity extends AppCompatActivity {
                 this.currentPage++;
 
             }
-            return brands;
-
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
-
+        return brands;
     }
 
 
